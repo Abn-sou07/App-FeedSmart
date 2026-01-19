@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FeedSmart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ===== BODY ===== */
+        body {
+            background: linear-gradient(135deg, #020617, #020617);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* ===== BOTÃO MENU ===== */
+        #menuBtn {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1000;
+            background: #2563eb;
+            border: none;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(2, 6, 23, 0.95);
+            padding: 20px;
+            transform: translateX(-100%);
+            transition: 0.3s;
+            z-index: 999;
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #sidebar button {
+            width: 100%;
+            margin: 6px 0;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2563eb;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        /* ===== MAIN ===== */
+        main {
+            padding: 70px 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ===== SEÇÕES PADRÃO ===== */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 15px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        /* ===================================================== */
+        /* ========== SEÇÃO ENVIAR FEEDBACK (IGUAL AO SEU) ===== */
+        /* ===================================================== */
+
+        #feedback h1 {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        #busca {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filtro-btn {
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filtro-ativo {
+            background: #2563eb;
+            color: white;
+        }
+
+        .lista {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .card-empresa {
+            background: white;
+            color: black;
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .favorito {
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .favorito.ativo {
+            color: gold;
+        }
+
+        .btn-ver {
+            padding: 8px 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* ===== DETALHES ===== */
+        #detalhes {
+            position: fixed;
+            inset: 0;
+            background: white;
+            color: black;
+            padding: 20px;
+            display: none;
+            overflow-y: auto;
+            z-index: 9999;
+        }
+
+        .estrela {
+            font-size: 28px;
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        .estrela.ativa {
+            color: gold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-enviar {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-voltar {
+            background: #e5e5e5;
+        }
+
+        /* ===== FEEDBACK BOX ===== */
+        #feedbackBox {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 16px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+            border-radius: 16px 16px 0 0;
+            z-index: 99999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="menuBtn">☰</button>
+
+    <div id="sidebar">
+        <h2>FeedSmart</h2>
+        <button onclick="showPage('dashboard')">📊 Dashboard</button>
+        <button onclick="showPage('feedback')">✍️ Enviar Feedback</button>
+        <button onclick="showPage('lista')">📋 Feedbacks</button>
+        <button onclick="showPage('relatorios')">📈 Relatórios</button>
+        <button onclick="showPage('config')">⚙️ Configurações</button>
+        <button onclick="showPage('suporte')">❓ Suporte</button>
+    </div>
+
+    <main>
+
+        <section id="dashboard" class="page active">
+            <h1>Dashboard</h1>
+            <div class="cards">
+                <div class="card">Total de Feedbacks</div>
+                <div class="card">Média de Avaliação</div>
+                <div class="card">Categorias</div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO SUBSTITUÍDA ================= -->
+
+        <section id="feedback" class="page">
+
+            <h1>Empresas</h1>
+
+            <input id="busca" type="text" placeholder="Buscar empresa..." />
+
+            <div class="filtros" id="filtros"></div>
+            <div class="lista" id="lista"></div>
+
+            <div id="detalhes">
+                <button class="btn btn-voltar" onclick="fecharDetalhes()">Voltar</button>
+                <h2 id="detalhesNome"></h2>
+                <p id="detalhesCategoria"></p>
+                <p id="detalhesCidade"></p>
+                <h3>Avaliação</h3>
+                <div id="estrelas"></div>
+                <button class="btn btn-enviar" onclick="abrirFeedback()">Enviar Feedback</button>
+            </div>
+
+            <div id="feedbackBox">
+                <h3>Enviar Feedback</h3>
+                <p id="feedbackEmpresa"></p>
+                <textarea id="feedbackTexto" placeholder="Escreva seu feedback..."
+                    style="width:100%;height:80px;"></textarea>
+                <button onclick="enviarFeedback()" class="btn btn-enviar">Enviar</button>
+                <button onclick="fecharFeedback()" class="btn btn-voltar">Cancelar</button>
+            </div>
+
+        </section>
+
+        <section id="lista" class="page">
+            <h1>Lista</h1>
+        </section>
+        <section id="relatorios" class="page">
+            <h1>Relatórios</h1>
+        </section>
+        <section id="config" class="page">
+            <h1>Configurações</h1>
+        </section>
+        <section id="suporte" class="page">
+            <h1>Suporte</h1>
+        </section>
+
+    </main>
+
+    <script>
+        /* ===== SPA ===== */
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.getElementById("sidebar");
+
+        menuBtn.onclick = () => sidebar.classList.toggle("open");
+
+        function showPage(id) {
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            document.getElementById(id).classList.add("active");
+            sidebar.classList.remove("open");
+        }
+
+        /* ===== CÓDIGO ORIGINAL DE EMPRESAS (SEM ALTERAR LÓGICA) ===== */
+        const empresas = [
+            { id: 1, nome: "TechVision", categoria: "Tecnologia", cidade: "Picos" },
+            { id: 2, nome: "GreenLife", categoria: "Saúde", cidade: "Picos" },
+            { id: 3, nome: "MarketPlus", categoria: "Varejo", cidade: "Picos" },
+            { id: 4, nome: "AutoPrime", categoria: "Automotivo", cidade: "Picos" },
+            { id: 5, nome: "FinanPro", categoria: "Finanças", cidade: "Picos" }
+        ];
+
+        const categorias = ["Todas", "Tecnologia", "Saúde", "Varejo", "Automotivo", "Finanças"];
+        let categoriaAtual = "Todas";
+        let favoritas = new Set();
+        let empresaSelecionada = null;
+        let avaliacao = 0;
+
+        const lista = document.getElementById("lista");
+        const filtrosDiv = document.getElementById("filtros");
+        const buscaInput = document.getElementById("busca");
+
+        function renderFiltros() {
+            filtrosDiv.innerHTML = "";
+            categorias.forEach(cat => {
+                const b = document.createElement("button");
+                b.textContent = cat;
+                b.className = "filtro-btn " + (cat === categoriaAtual ? "filtro-ativo" : "");
+                b.onclick = () => { categoriaAtual = cat; renderFiltros(); renderLista(); }
+                filtrosDiv.appendChild(b);
+            });
+        }
+
+        function renderLista() {
+            lista.innerHTML = "";
+            empresas.filter(e =>
+                (categoriaAtual === "Todas" || e.categoria === categoriaAtual) &&
+                e.nome.toLowerCase().includes(buscaInput.value.toLowerCase())
+            ).forEach(e => {
+                const c = document.createElement("div");
+                c.className = "card-empresa";
+                c.innerHTML = `
+      <div><strong>${e.nome}</strong><br>${e.categoria} • ${e.cidade}</div>
+      <div>
+        <span class="favorito ${favoritas.has(e.id) ? "ativo" : ""}" onclick="toggleFav(${e.id})">★</span>
+        <button class="btn-ver" onclick="abrirDetalhes(${e.id})">Ver</button>
+      </div>`;
+                lista.appendChild(c);
+            });
+        }
+
+        function toggleFav(id) { favoritas.has(id) ? favoritas.delete(id) : favoritas.add(id); renderLista(); }
+
+        function abrirDetalhes(id) {
+            empresaSelecionada = empresas.find(e => e.id === id);
+            detalhesNome.innerText = empresaSelecionada.nome;
+            detalhesCategoria.innerText = empresaSelecionada.categoria;
+            detalhesCidade.innerText = empresaSelecionada.cidade;
+            renderEstrelas();
+            detalhes.style.display = "block";
+        }
+
+        function fecharDetalhes() { detalhes.style.display = "none"; }
+
+        function renderEstrelas() {
+            estrelas.innerHTML = "";
+            for (let i = 1; i <= 5; i++) {
+                const s = document.createElement("span");
+                s.innerText = "★";
+                s.className = "estrela " + (i <= avaliacao ? "ativa" : "");
+                s.onclick = () => { avaliacao = i; renderEstrelas(); }
+                estrelas.appendChild(s);
+            }
+        }
+
+        function abrirFeedback() {
+            feedbackEmpresa.innerText = "Empresa: " + empresaSelecionada.nome;
+            feedbackBox.style.display = "block";
+        }
+
+        function fecharFeedback() { feedbackBox.style.display = "none"; }
+
+        function enviarFeedback() {
+            if (!feedbackTexto.value.trim()) return alert("Digite seu feedback!");
+            alert("Feedback enviado!");
+            fecharFeedback();
+        }
+
+        buscaInput.addEventListener("input", renderLista);
+        renderFiltros();
+        renderLista();
+    </script>
+
+</body>
+
+</html>
